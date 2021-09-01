@@ -1,105 +1,123 @@
+/* EXERCISE 1-23.
+ *
+ * Write a program to remove all comments from a C program. Don't
+ * forget to handle quoted strings and character constants properly. C comments
+ * don't nest. */
+
+#include <stdbool.h>
 #include <stdio.h>
+#define MAXTEXTLEN 10000
 
-#define MAXSTR 10000
+// declarations
+// takes text and removes all '/*..*/' comments
+void del_star_coms(char text[], char text_no_coms[]);
+// takes text and removes all '//' comments
+void del_oneline_coms(char text_[], char text_no_coms_[]);
 
-#define TRUE (1 == 1)
-#define FALSE !TRUE
+int main(void) {
 
-// This is a test comment.
+  int i = 0;
+  char c;
+  char text[MAXTEXTLEN], text_no_star_coms[MAXTEXTLEN],
+      text_no_dash_coms[MAXTEXTLEN];
 
-int get_str(char str[], int limit); // This is another test comment.
-void remove_comments(char str[], char no_com_str[]);
+  while ((c = getchar()) != EOF) {
 
-int main(void)
-{
-  /**
-   * This is multiline
-   * block
-   * comment.
-  */
+    text[i++] = c;
+  }
 
-  char str[MAXSTR];
-  char no_com_str[MAXSTR];
+  text[i] = '\0';
 
-  get_str(str, MAXSTR);
+  del_star_coms(text, text_no_star_coms);
+  del_oneline_coms(text_no_star_coms, text_no_dash_coms);
 
-  remove_comments(str, no_com_str);
-
-  printf("%s", no_com_str);
-
+  printf("%s", text_no_dash_coms);
   return 0;
 }
 
-int get_str(char str[], int limit)
-{
-  int c, i = 0;
+// defs
+/* text is copied to text_no_coms */
+void del_star_coms(char text[], char text_no_coms[]) {
+  int j = 0, i = 0;
+  bool in_comment = false;
+  char c, chc[2];
 
-  while (i < limit - 1 && (c = getchar()) != EOF)
-  {
-    str[i++] = c;
-  }
-  str[i] = '\0';
+  while (text[i] != EOF) {
 
-  return i;
-}
+    c = text[i];
 
-void remove_comments(char str[], char no_com_str[])
-{
-  int in_quote = FALSE;
-  int line_comment = FALSE;
-  int block_comment = FALSE;
+    if (i > 0) {
 
-  int i = 0, j = 0;
-  while (str[i] != '\0')
-  {
-    if (!in_quote && str[i] == '"')
-    {
-      in_quote = TRUE;
+      // placeholder for "/*", "*/" and "//" checker
+      chc[0] = chc[1];
+      chc[1] = c;
+
+      // determine if in comment
+      if ((chc[0] == '/') & (chc[1] == '*')) {
+        in_comment = true;
+        j--; // remove previous "/"
+      }
+
+      if (in_comment) {
+
+        // determine if terminate comment flag
+        if ((chc[0] == '*') & (chc[1] == '/')) {
+          in_comment = false;
+        }
+
+      } else {
+        text_no_coms[j++] = c;
+      }
+    } else {
+
+      chc[1] = c;
+      text_no_coms[j++] = c;
     }
-    else if (in_quote && str[i] == '"')
-    {
-      in_quote = FALSE;
-    }
 
-    if (!in_quote)
-    {
-      if (str[i] == '/' && str[i + 1] == '*' && !line_comment)
-      {
-        block_comment = TRUE;
-      }
-
-      if (str[i] == '*' && str[i + 1] == '/')
-      {
-        block_comment = FALSE;
-        i += 2;
-      }
-
-      if (str[i] == '/' && str[i] == '/')
-      {
-        line_comment = TRUE;
-      }
-
-      if (str[i] == '\n')
-      {
-        line_comment = FALSE;
-      }
-
-      if (line_comment || block_comment)
-      {
-        ++i;
-      }
-      else if (!line_comment || !block_comment)
-      {
-        no_com_str[j++] = str[i++];
-      }
-    }
-    else
-    {
-      no_com_str[j++] = str[i++];
-    }
+    i++;
   }
 
-  no_com_str[j] = '\0';
+  text_no_coms[j] = '\0';
 }
 
-// NOTE: run: ./c_remove_comments < c_remove_comments.c
+void del_oneline_coms(char text_[], char text_no_coms_[]) {
+  int j = 0, i = 0;
+  bool in_comment = false;
+  char c, chc[2];
+
+  while (text_[i] != EOF) {
+
+    c = text_[i];
+
+    if (i > 0) {
+
+      // placeholder for "/*", "*/" and "//" checker
+      chc[0] = chc[1];
+      chc[1] = c;
+
+      // determine if in comment
+      if ((chc[0] == '/') & (chc[1] == '/')) {
+        in_comment = true;
+        j--; // remove previous "/"
+      }
+
+      if (in_comment) {
+
+        // determine if terminate comment flag
+        if (c == '\n') {
+          in_comment = false;
+        }
+
+      } else {
+        text_no_coms_[j++] = c;
+      }
+    } else {
+
+      chc[1] = c;
+      text_no_coms_[j++] = c;
+    }
+
+    i++;
+  }
+  text_no_coms_[j] = '\0';
+}
