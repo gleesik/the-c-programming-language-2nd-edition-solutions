@@ -1,24 +1,31 @@
 #include <stdio.h>
 
-#define MAXLINE 1000
-#define LIMIT 80
+#define THRESHOLD 83
 
 int get_line(char line[], int max_line_len);
 
-int main(void)
-{
-  int len;
-  char line[MAXLINE];
+int main(void) {
+    int len, nextLen;
+    char first[THRESHOLD];
+    char continuous[THRESHOLD];
 
-  while ((len = get_line(line, MAXLINE)) > 0)
-  {
-    if (len > LIMIT)
-    {
-      printf("%s", line);
+    while ((len = get_line(first, THRESHOLD)) > 0) {
+        if (len == THRESHOLD-1) {
+            // length contains \n (so +1 to actual count)
+            printf("%s", first);
+            nextLen = THRESHOLD-1;
+            
+            // check if the string terminated at exactly the 81st place by a newline.
+            // If so, no need to look for new segments of same line input.
+            if (first[81] != '\n') {
+                while (nextLen == THRESHOLD-1) {
+                    nextLen = get_line(continuous, THRESHOLD);
+                    printf("%s", continuous);
+                }
+            }
+        }
+        len = 0;
     }
-  }
-
-  return 0;
 }
 
 int get_line(char line[], int max_line_len)
