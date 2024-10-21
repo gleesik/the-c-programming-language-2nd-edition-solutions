@@ -37,11 +37,8 @@ int strend(char *s, char *t)
 
   // Check backwards if each character from string t occurs in the corresonding
   // location from the string s.
-  while (t_length && (*s-- == *t--))
+  while (*s-- == *t--)
     --t_length;
 
-  if (t_length)
-    return 0;
-
-  return 1;
+  return !t_length;
 }
